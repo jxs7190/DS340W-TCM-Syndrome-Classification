@@ -11,6 +11,8 @@ The parent paper reports that the kidney and stomach datasets are publicly avail
 - https://github.com/web333panda/TCM-Dataset
 - https://www.ncmi.cn/index.htm
 
+The public GitHub repository contains the two spreadsheet datasets. It does not contain the official ML-PRDF/MLDF source code used by the authors.
+
 ## Repository structure
 
 ```text
@@ -19,11 +21,14 @@ DS340W-TCM-Syndrome-Classification/
 ├── requirements.txt
 ├── data/
 │   └── README.md
+├── notebooks/
+│   └── 01_stomach_full_workflow.ipynb
 └── src/
     ├── split_data.py
     ├── preprocess.py
     ├── pcc_mlrf_course.py
-    └── baseline_model.py
+    ├── baseline_model.py
+    └── stomach_full_workflow.py
 ```
 
 ## Parent-paper workflow
@@ -39,29 +44,94 @@ DS340W-TCM-Syndrome-Classification/
 
 The paper states that after integration/standardization it had 645 kidney-disease samples with 755 symptom features and 124 syndrome labels, and 436 stomach-disease samples with 323 symptom features and 49 syndrome labels.
 
-## Run the stomach-data split
+The public raw stomach spreadsheet currently contains more cases and labels than the paper's post-standardization table. The notebook therefore reproduces the published workflow on the public raw dataset, but does not claim to recreate the authors' undocumented SymMap dictionary or exact final 436-case dataset.
 
-Put `ds340wstomach.xlsx` in your working directory, install dependencies, then run:
+## Easiest option: run the Colab-ready notebook
+
+Open:
+
+`notebooks/01_stomach_full_workflow.ipynb`
+
+The notebook downloads the public stomach spreadsheet directly from the paper's GitHub repository. No manual dataset upload is required.
+
+It performs:
+
+```text
+public stomach spreadsheet
+        ↓
+basic missing-record cleaning
+        ↓
+case-level 70 / 20 / 10 split
+        ↓
+TRAIN          TEST          VALIDATION
+  ↓              ↓              ↓
+  └──── development ────┘      saved only
+        ↓                       untouched
+combine rows into multi-label cases
+        ↓
+TF-IDF fit on TRAIN only
+        ↓
+PCC-MLRF-style feature ranking on TRAIN only
+        ↓
+select top features
+        ↓
+multi-output Random Forest baseline
+        ↓
+TEST evaluation
+```
+
+The notebook deliberately removes the validation dataframe from the active workflow after saving it. A final-validation cell is included at the bottom but commented out.
+
+## Run the complete stomach workflow from the command line
+
+Install dependencies and run:
 
 ```bash
 pip install -r requirements.txt
-python src/split_data.py ds340wstomach.xlsx --case-column 编号 --name stomach
+python src/stomach_full_workflow.py
 ```
 
-This creates separate training, test, and validation files. The split is done by unique clinical case ID, not individual rows, to prevent the same multi-label case from leaking into more than one partition.
+The script automatically downloads the stomach dataset, creates the three course-required split files, performs preprocessing and feature selection, trains the baseline model, and writes test results under `results/`.
 
-## Run the baseline pipeline
+Expected split for the current public raw stomach file with the fixed seed used by the workflow:
 
-After the split:
+```text
+Training:   366 clinical cases
+Test:       105 clinical cases
+Validation:  53 clinical cases
+Total:      524 clinical cases
+```
+
+The row counts differ from these case counts because one clinical case can have multiple syndrome-label rows.
+
+## Run only the data split
+
+If you already downloaded `ds340wstomach.xlsx`:
 
 ```bash
-python src/baseline_model.py
+python src/split_data.py ds340wstomach.xlsx --case-column 编号 --name stomach --random-state 0
 ```
 
-The baseline fits TF-IDF and the model using training data and evaluates on the test set only. It deliberately does not load the final validation file.
+This creates:
+
+```text
+data/train/stomach_training.xlsx
+data/test/stomach_test.xlsx
+data/validation/stomach_validation_UNSEEN.xlsx
+```
+
+The split is performed by unique clinical case ID (`编号`), not by individual spreadsheet row, to prevent the same multi-label case from leaking across partitions.
 
 ## About PCC-MLRF / MLDF
 
-`src/pcc_mlrf_course.py` is a transparent paper-inspired course reimplementation of the PCC-MLRF feature-ranking idea described in the article. It is **not** claimed to be the authors' official source code. The cited public GitHub repository is a dataset repository, and the exact original ML-PRDF source code was not identified there.
+`src/pcc_mlrf_course.py` is a transparent paper-inspired course reimplementation of the PCC-MLRF feature-ranking idea described in the article. It uses the concepts reported by the paper: Pearson-correlation-based sample similarity, traversal through training cases, Hit/Miss neighbors, feature-weight updates, and descending feature ranking.
 
-The current `baseline_model.py` uses a standard multi-output random-forest classifier so the data, preprocessing, and evaluation pipeline can be verified before replacing the baseline with a fuller MLDF-style cascade implementation.
+It is **not** claimed to be the authors' official code. The authors' cited public repository contains the datasets but not the exact original ML-PRDF implementation.
+
+The current classifier is a standard multi-output Random Forest baseline. This gives the project a complete, reproducible pipeline before a more specialized MLDF cascade is attempted.
+
+## Validation rule
+
+During development, use only Training and Test. Do not fit TF-IDF, feature selection, model parameters, thresholds, or other learned choices on the validation set.
+
+Only after the training/test workflow is finalized should `stomach_validation_UNSEEN.xlsx` be loaded for the final evaluation.
