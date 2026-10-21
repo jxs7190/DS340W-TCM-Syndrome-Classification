@@ -1,0 +1,266 @@
+{
+  "dummy": {
+    "threshold": 0.1,
+    "oof_micro_f1": 0.1821705426356589,
+    "threshold_search": [
+      {
+        "threshold": 0.1,
+        "micro_f1": 0.1821705426356589
+      },
+      {
+        "threshold": 0.15,
+        "micro_f1": 0.15736040609137056
+      },
+      {
+        "threshold": 0.2,
+        "micro_f1": 0.04771371769383698
+      },
+      {
+        "threshold": 0.25,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.3,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.35,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.4,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.45,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.5,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.55,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.6,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.65,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.7,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.75,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.8,
+        "micro_f1": 0.0
+      }
+    ]
+  },
+  "logistic": {
+    "threshold": 0.4,
+    "oof_micro_f1": 0.22202166064981949,
+    "threshold_search": [
+      {
+        "threshold": 0.1,
+        "micro_f1": 0.06474555487431025
+      },
+      {
+        "threshold": 0.15,
+        "micro_f1": 0.10008554319931566
+      },
+      {
+        "threshold": 0.2,
+        "micro_f1": 0.12945759664369194
+      },
+      {
+        "threshold": 0.25,
+        "micro_f1": 0.15475255302435192
+      },
+      {
+        "threshold": 0.3,
+        "micro_f1": 0.18433179723502305
+      },
+      {
+        "threshold": 0.35,
+        "micro_f1": 0.20821917808219179
+      },
+      {
+        "threshold": 0.4,
+        "micro_f1": 0.22202166064981949
+      },
+      {
+        "threshold": 0.45,
+        "micro_f1": 0.1981981981981982
+      },
+      {
+        "threshold": 0.5,
+        "micro_f1": 0.1878453038674033
+      },
+      {
+        "threshold": 0.55,
+        "micro_f1": 0.1465076660988075
+      },
+      {
+        "threshold": 0.6,
+        "micro_f1": 0.09689922480620156
+      },
+      {
+        "threshold": 0.65,
+        "micro_f1": 0.05161290322580645
+      },
+      {
+        "threshold": 0.7,
+        "micro_f1": 0.036036036036036036
+      },
+      {
+        "threshold": 0.75,
+        "micro_f1": 0.013953488372093023
+      },
+      {
+        "threshold": 0.8,
+        "micro_f1": 0.00477326968973747
+      }
+    ]
+  },
+  "rf_all": {
+    "threshold": 0.15,
+    "oof_micro_f1": 0.20018885741265344,
+    "threshold_search": [
+      {
+        "threshold": 0.1,
+        "micro_f1": 0.18915510718789408
+      },
+      {
+        "threshold": 0.15,
+        "micro_f1": 0.20018885741265344
+      },
+      {
+        "threshold": 0.2,
+        "micro_f1": 0.19216182048040456
+      },
+      {
+        "threshold": 0.25,
+        "micro_f1": 0.18037974683544303
+      },
+      {
+        "threshold": 0.3,
+        "micro_f1": 0.14339622641509434
+      },
+      {
+        "threshold": 0.35,
+        "micro_f1": 0.12159329140461216
+      },
+      {
+        "threshold": 0.4,
+        "micro_f1": 0.0915032679738562
+      },
+      {
+        "threshold": 0.45,
+        "micro_f1": 0.06018518518518518
+      },
+      {
+        "threshold": 0.5,
+        "micro_f1": 0.023980815347721823
+      },
+      {
+        "threshold": 0.55,
+        "micro_f1": 0.009708737864077669
+      },
+      {
+        "threshold": 0.6,
+        "micro_f1": 0.004889975550122249
+      },
+      {
+        "threshold": 0.65,
+        "micro_f1": 0.004889975550122249
+      },
+      {
+        "threshold": 0.7,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.75,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.8,
+        "micro_f1": 0.0
+      }
+    ]
+  },
+  "rf_selected": {
+    "threshold": 0.2,
+    "oof_micro_f1": 0.167816091954023,
+    "threshold_search": [
+      {
+        "threshold": 0.1,
+        "micro_f1": 0.16268560361523562
+      },
+      {
+        "threshold": 0.15,
+        "micro_f1": 0.1624007060900265
+      },
+      {
+        "threshold": 0.2,
+        "micro_f1": 0.167816091954023
+      },
+      {
+        "threshold": 0.25,
+        "micro_f1": 0.1568627450980392
+      },
+      {
+        "threshold": 0.3,
+        "micro_f1": 0.14626391096979333
+      },
+      {
+        "threshold": 0.35,
+        "micro_f1": 0.12681159420289856
+      },
+      {
+        "threshold": 0.4,
+        "micro_f1": 0.10216110019646366
+      },
+      {
+        "threshold": 0.45,
+        "micro_f1": 0.07531380753138076
+      },
+      {
+        "threshold": 0.5,
+        "micro_f1": 0.06222222222222222
+      },
+      {
+        "threshold": 0.55,
+        "micro_f1": 0.04128440366972477
+      },
+      {
+        "threshold": 0.6,
+        "micro_f1": 0.02358490566037736
+      },
+      {
+        "threshold": 0.65,
+        "micro_f1": 0.009685230024213076
+      },
+      {
+        "threshold": 0.7,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.75,
+        "micro_f1": 0.0
+      },
+      {
+        "threshold": 0.8,
+        "micro_f1": 0.0
+      }
+    ]
+  }
+}

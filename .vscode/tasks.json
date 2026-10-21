@@ -1,0 +1,6 @@
+{"version":"2.0.0","tasks":[
+  {"label":"TCM: train stomach","type":"process","command":"${command:python.interpreterPath}","args":["-m","tcm","train","--dataset","stomach"],"options":{"cwd":"${workspaceFolder}"},"problemMatcher":[]},
+  {"label":"TCM: train kidney","type":"process","command":"${command:python.interpreterPath}","args":["-m","tcm","train","--dataset","kidney"],"options":{"cwd":"${workspaceFolder}"},"problemMatcher":[]},
+  {"label":"TCM: dashboard","type":"process","command":"${command:python.interpreterPath}","args":["-m","streamlit","run","app.py"],"options":{"cwd":"${workspaceFolder}"},"problemMatcher":[]},
+  {"label":"TCM: tests","type":"process","command":"${command:python.interpreterPath}","args":["-m","pytest","-q"],"options":{"cwd":"${workspaceFolder}"},"problemMatcher":[]}
+]}

@@ -1,137 +1,98 @@
-# DS340W TCM Syndrome Classification
+# TCM Syndrome Classification — DS 340W
 
-Reimplementation project based on Gong et al. (2023), *A syndrome differentiation model of TCM based on multi-label deep forest using biomedical text mining*.
+Jackson Shi's Python research project: download real source data, train and compare classifiers, inspect a local dashboard, and predict TCM syndrome labels from Chinese symptoms.
 
-This repository follows the parent-paper workflow: preprocessing TCM clinical records, converting symptoms to TF-IDF features, performing PCC-MLRF-style feature selection, and training/evaluating a multi-label classifier. The course-required split is 70% training, 20% test, and 10% final unseen validation.
+**Research question:** How accurately can machine learning classify TCM syndromes from symptom data, and does feature selection improve a multi-output Random Forest?
 
-## Data source
+This implements the proposed TF-IDF / feature-selection / Random Forest experiment with baselines. It is **not an exact reproduction** of ML-PRDF, Cross-FGCNN, or TCM-BERT-CNN. Scores on different datasets/splits cannot establish improvement over those papers.
 
-The parent paper reports that the kidney and stomach datasets are publicly available from:
+## Start in VS Code on Windows
 
-- https://github.com/web333panda/TCM-Dataset
-- https://www.ncmi.cn/index.htm
+Install Git, Python **3.11 or 3.12**, VS Code, and its Microsoft Python extension. In a terminal:
 
-The public GitHub repository contains the two spreadsheet datasets. It does not contain the official ML-PRDF/MLDF source code used by the authors.
-
-## Repository structure
-
-```text
-DS340W-TCM-Syndrome-Classification/
-├── README.md
-├── requirements.txt
-├── data/
-│   └── README.md
-├── notebooks/
-│   └── 01_stomach_full_workflow.ipynb
-└── src/
-    ├── split_data.py
-    ├── preprocess.py
-    ├── pcc_mlrf_course.py
-    ├── baseline_model.py
-    └── stomach_full_workflow.py
+```powershell
+git clone https://github.com/jxs7190/DS340W-TCM-Syndrome-Classification.git
+cd DS340W-TCM-Syndrome-Classification
+code .
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m tcm train --dataset stomach
+.venv\Scripts\python.exe -m tcm train --dataset kidney
+.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-## Parent-paper workflow
+For Python 3.11 replace `py -3.12` with `py -3.11`. These commands use the virtual environment directly; PowerShell activation is unnecessary. On macOS/Linux use `python3 -m venv .venv` and `.venv/bin/python` instead of the Windows executable.
 
-1. Remove records missing symptoms or syndrome labels.
-2. Combine single-label records into multi-label clinical cases.
-3. Standardize symptom descriptions.
-4. Convert symptoms to TF-IDF features.
-5. Rank/select symptom features using a PCC-MLRF-style feature-selection stage.
-6. Train a multi-label classifier inspired by the paper's MLDF/ML-PRDF workflow.
-7. Evaluate on the test split during development.
-8. Use the untouched validation split only after the pipeline is finalized.
+In VS Code: **Ctrl+Shift+P → Python: Select Interpreter → .venv**. Then **Terminal → Run Task** provides training and dashboard tasks. F5 runs stomach training. Internet access is needed for the first source-data download.
 
-The paper states that after integration/standardization it had 645 kidney-disease samples with 755 symptom features and 124 syndrome labels, and 436 stomach-disease samples with 323 symptom features and 49 syndrome labels.
+Already cloned? Use `git pull` in the existing checkout, then reinstall requirements. Do not clone inside the old project folder. VS Code edits your local Git checkout; changes sync to GitHub when committed and pushed.
 
-The public raw stomach spreadsheet currently contains more cases and labels than the paper's post-standardization table. The notebook therefore reproduces the published workflow on the public raw dataset, but does not claim to recreate the authors' undocumented SymMap dictionary or exact final 436-case dataset.
+## Workflow
 
-## Easiest option: run the Colab-ready notebook
+1. Download stomach or kidney spreadsheets from the first paper's cited source at a pinned commit. Record URL, commit, and SHA-256.
+2. Use symptom fields only as predictors. Exclude treatments, outcomes, titles, and target clues.
+3. Combine repeated syndrome rows into multi-label records. Kidney records are grouped by symptom pattern within a source article: they are **not verified individual patients**.
+4. Keep source groups and identical normalized symptom sets in one partition. Split groups approximately 70% training / 20% development test / 10% final validation. Record proportions vary with group sizes.
+5. Three-fold grouped CV inside training refits TF-IDF and feature selection in every fold. Choose thresholds and the winning model using training out-of-fold micro-F1 only.
+6. Refit on all training records and evaluate each model on the development test. Save the winner with its vocabulary, label encoder, selected columns, and threshold.
+7. Keep final validation unused until explicitly unlocked. Evaluation counts labels unseen in training as missed labels, rather than dropping them.
 
-Open:
+Models: label-prior dummy; binary-relevance logistic regression; native multi-output Random Forest on all features; the same forest on up to 100 PCC-MLRF-style ranked features. RF shares trees across outputs, without class weighting. The selector is the repository's simplified paper-inspired algorithm, not official author code. No full SymMap synonym standardization is claimed.
 
-`notebooks/01_stomach_full_workflow.ipynb`
+## Your three papers
 
-The notebook downloads the public stomach spreadsheet directly from the paper's GitHub repository. No manual dataset upload is required.
+| Paper | Dataset status |
+|---|---|
+| Gong et al. (2023), ML-PRDF | Public stomach and kidney files; both runnable |
+| Huang et al. (2022), Cross-FGCNN | No original record-level download identified; authorized import supported |
+| Chen et al. (2024 issue; online Dec 2023), TCM-BERT-CNN | Original data available by author request; authorized import supported |
 
-It performs:
+See [data sources](docs/DATA_SOURCES.md). Raw datasets differ from the papers' standardized samples. Different disease/label sets are trained separately; no invented label mapping, synthetic clinical records, or unrelated datasets are substituted.
 
-```text
-public stomach spreadsheet
-        ↓
-basic missing-record cleaning
-        ↓
-case-level 70 / 20 / 10 split
-        ↓
-TRAIN          TEST          VALIDATION
-  ↓              ↓              ↓
-  └──── development ────┘      saved only
-        ↓                       untouched
-combine rows into multi-label cases
-        ↓
-TF-IDF fit on TRAIN only
-        ↓
-PCC-MLRF-style feature ranking on TRAIN only
-        ↓
-select top features
-        ↓
-multi-output Random Forest baseline
-        ↓
-TEST evaluation
+## Outputs
+
+`runs/<dataset>/` contains:
+
+- `report.html`, `comparison.png`, `comparison.csv`: model comparison.
+- `training_cv.json`: threshold search and training CV selection scores, not independent generalization estimates.
+- `run.json`: provenance, hashes, split counts, configuration, environment, winner, validation status.
+- `model.joblib`: complete predictor bundle.
+- `test_predictions.csv`, `<model>_test_metrics.json`, `<model>_per_label.csv`: actual development-test predictions, metrics, per-label confusion counts.
+- `selected_features.csv`: winner's features; ranking weights populated only for feature selection.
+- `train.jsonl`, `test.jsonl`, `validation.jsonl`: local split files, excluded from Git.
+
+Metrics include micro/macro F1, precision, recall, exact label-set accuracy, Hamming loss, and micro average precision. Low Hamming loss alone can hide poor rare-label recall. Macro F1 includes training labels and unseen evaluation labels; inspect support counts. Predictions may legitimately contain no labels above the threshold.
+
+Runs refuse to overwrite an experiment. Use a new directory for another configuration:
+
+```powershell
+.venv\Scripts\python.exe -m tcm train --dataset stomach --output runs_experiment2 --top-k 150
 ```
 
-The notebook deliberately removes the validation dataframe from the active workflow after saving it. A final-validation cell is included at the bottom but commented out.
+## Predict
 
-## Run the complete stomach workflow from the command line
-
-Install dependencies and run:
-
-```bash
-pip install -r requirements.txt
-python src/stomach_full_workflow.py
+```powershell
+.venv\Scripts\python.exe -m tcm predict --model runs/stomach/model.joblib --symptoms "腹部冷痛、腹泻、食欲不振"
 ```
 
-The script automatically downloads the stomach dataset, creates the three course-required split files, performs preprocessing and feature selection, trains the baseline model, and writes test results under `results/`.
+Load only trusted artifacts produced by this project. Match the training language/vocabulary. Scores are uncalibrated research scores, not clinical probabilities.
 
-Expected split for the current public raw stomach file with the fixed seed used by the workflow:
+## Final validation — after development is finished
 
-```text
-Training:   366 clinical cases
-Test:       105 clinical cases
-Validation:  53 clinical cases
-Total:      524 clinical cases
+```powershell
+.venv\Scripts\python.exe -m tcm validate --run runs/stomach --final
 ```
 
-The row counts differ from these case counts because one clinical case can have multiple syndrome-label rows.
+This evaluates the frozen winner without refitting/retuning, checks model and holdout hashes, writes `final_validation.json`, and refuses a second final evaluation in the same run. The guard is a workflow convention, not access control: the local holdout is readable. Do not tune from final results and call the same holdout unseen.
 
-## Run only the data split
+## Files and tests
 
-If you already downloaded `ds340wstomach.xlsx`:
+`tcm/data.py`: source adapters/grouping/splits. `tcm/model.py`: models/evaluation. `tcm/__main__.py`: CLI. `app.py`: local Streamlit viewer. `.vscode/`: tasks/debugging. `tests/`: correctness checks. `docs/`: sources and verified evidence.
 
-```bash
-python src/split_data.py ds340wstomach.xlsx --case-column 编号 --name stomach --random-state 0
+The supported entry point is `python -m tcm`. Earlier `src/` and `notebooks/` prototypes are retained, but lack the new source/duplicate safeguards and unseen-label accounting. Use the new CLI for reported experiments.
+
+```powershell
+.venv\Scripts\python.exe -m pytest -q
 ```
 
-This creates:
-
-```text
-data/train/stomach_training.xlsx
-data/test/stomach_test.xlsx
-data/validation/stomach_validation_UNSEEN.xlsx
-```
-
-The split is performed by unique clinical case ID (`编号`), not by individual spreadsheet row, to prevent the same multi-label case from leaking across partitions.
-
-## About PCC-MLRF / MLDF
-
-`src/pcc_mlrf_course.py` is a transparent paper-inspired course reimplementation of the PCC-MLRF feature-ranking idea described in the article. It uses the concepts reported by the paper: Pearson-correlation-based sample similarity, traversal through training cases, Hit/Miss neighbors, feature-weight updates, and descending feature ranking.
-
-It is **not** claimed to be the authors' official code. The authors' cited public repository contains the datasets but not the exact original ML-PRDF implementation.
-
-The current classifier is a standard multi-output Random Forest baseline. This gives the project a complete, reproducible pipeline before a more specialized MLDF cascade is attempted.
-
-## Validation rule
-
-During development, use only Training and Test. Do not fit TF-IDF, feature selection, model parameters, thresholds, or other learned choices on the validation set.
-
-Only after the training/test workflow is finalized should `stomach_validation_UNSEEN.xlsx` be loaded for the final evaluation.
+See `docs/VERIFIED_RUN.md` for the executed experiment. Small datasets, incomplete synonym mapping, rare labels, and source-derived records limit conclusions. One seed is an initial experiment, not evidence of clinical reliability or a statistically significant improvement.

@@ -1,0 +1,37 @@
+{
+  "dataset": "kidney",
+  "provenance": {
+    "source_url": "https://raw.githubusercontent.com/web333panda/TCM-Dataset/b3ebee62d3adf2ee15a93c2af85fcb85963e6146/%E8%82%BE%E8%A1%B0%E6%95%B0%E6%8D%AE%281%29.xls",
+    "source_commit": "b3ebee62d3adf2ee15a93c2af85fcb85963e6146",
+    "sha256": "03365a85b3226f447700406d25afcd7523993ee515be83b2825ee91d7e8c2a58",
+    "raw_rows": 2283,
+    "usable_rows": 588,
+    "cases": 427,
+    "groups": 208,
+    "label_count": 152
+  },
+  "seed": 0,
+  "research_question": "How accurately can machine learning classify TCM syndromes from symptom data, and does feature selection improve a multi-output Random Forest?",
+  "parameters": {
+    "top_k": 100,
+    "trees": 200,
+    "cv_folds": 3
+  },
+  "split_counts": {
+    "train": 285,
+    "test": 83,
+    "validation": 59
+  },
+  "split_policy": "70/20/10 approximate by independent source/duplicate group; final validation unused",
+  "winner": "logistic",
+  "selection_rule": "highest training grouped-OOF micro-F1 after threshold search",
+  "validation_status": "UNUSED",
+  "model_sha256": "f4e43e47a15f6e2236f46b454a9464563e090e86775e7ee57debd3ed99490d3f",
+  "validation_sha256": "240f80a557a6885c1c93b84cd35b470684790df1f56cbf9f45abcec7badaca24",
+  "environment": {
+    "python": "3.12.14",
+    "sklearn": "1.8.0",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3"
+  }
+}

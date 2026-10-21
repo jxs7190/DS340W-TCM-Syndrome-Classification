@@ -11,3 +11,11 @@ data/raw/*
 data/validation/*
 !data/raw/.gitkeep
 !data/validation/.gitkeep
+
+# Local experiment records and fitted artifacts
+runs*/
+.pytest_cache/
+*.joblib
+data/train/
+data/test/
+results/
